@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use btleplug::api::{
-    Central, Characteristic, Manager as _, Peripheral as _, ScanFilter, WriteType,
+    BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter, WriteType,
 };
 use btleplug::platform::{Adapter, Manager, Peripheral};
 
@@ -66,7 +66,23 @@ impl BluetoothWrapper {
             .await
             .expect("Failed to find the device");
 
-        info!("Found device: {:?}", device.address());
+        let properties = device.properties().await.unwrap().unwrap_or_default();
+        let address = device.address();
+
+        if address != BDAddr::default() {
+            info!(
+                "Found device: id={}, address={}, name={:?}",
+                device.id(),
+                address,
+                properties.local_name
+            );
+        } else {
+            info!(
+                "Found device: id={}, name={:?} (Bluetooth address unavailable on this backend)",
+                device.id(),
+                properties.local_name
+            );
+        }
 
         device
             .connect()
