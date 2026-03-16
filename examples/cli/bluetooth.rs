@@ -62,13 +62,21 @@ impl BluetoothWrapper {
             .next()
             .expect("Unable to find adapters.");
 
-        let device = find_device(&adapter).await.unwrap();
+        let device = find_device(&adapter)
+            .await
+            .expect("Failed to find the device");
 
         info!("Found device: {:?}", device.address());
 
-        device.connect().await.unwrap();
+        device
+            .connect()
+            .await
+            .expect("failed to connect to display");
 
-        device.discover_services().await.unwrap();
+        device
+            .discover_services()
+            .await
+            .expect("discover_services failed");
 
         let chars = device.characteristics();
         let write_char = find_characteristic(&chars, *UUID_WRITE_DATA);
